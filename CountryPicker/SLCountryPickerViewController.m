@@ -15,27 +15,27 @@ static NSString *CellIdentifier = @"CountryCell";
 }
 
 - (void)createSearchBar {
-        if (self.tableView && !self.tableView.tableHeaderView) {
-            UISearchBar * theSearchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0,0,320,40)]; // frame has no effect.
-            theSearchBar.delegate = self;
-
-            theSearchBar.showsCancelButton = YES;
-            
-            
-            self.tableView.tableHeaderView = theSearchBar;
-            
-            UISearchDisplayController *searchCon = [[UISearchDisplayController alloc]
-                                                    initWithSearchBar:theSearchBar
-                                                    contentsController:self ];
-            self.searchController = searchCon;
-            _searchController.delegate = self;
-            _searchController.searchResultsDataSource = self;
-            _searchController.searchResultsDelegate = self;
-            
-//            [_searchController setActive:YES animated:YES];
-            [theSearchBar becomeFirstResponder];
-//            _searchController.displaysSearchBarInNavigationBar = YES;
-        }
+    if (self.tableView && !self.tableView.tableHeaderView) {
+        UISearchBar * theSearchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0,0,320,40)]; // frame has no effect.
+        theSearchBar.delegate = self;
+        
+        theSearchBar.showsCancelButton = YES;
+        
+        
+        self.tableView.tableHeaderView = theSearchBar;
+        
+        UISearchDisplayController *searchCon = [[UISearchDisplayController alloc]
+                                                initWithSearchBar:theSearchBar
+                                                contentsController:self ];
+        self.searchController = searchCon;
+        _searchController.delegate = self;
+        _searchController.searchResultsDataSource = self;
+        _searchController.searchResultsDelegate = self;
+        
+        //            [_searchController setActive:YES animated:YES];
+        [theSearchBar becomeFirstResponder];
+        //            _searchController.displaysSearchBarInNavigationBar = YES;
+    }
 }
 - (void)viewDidLoad
 {
@@ -56,12 +56,12 @@ static NSString *CellIdentifier = @"CountryCell";
         
     }
     _sections = [self partitionObjects:countriesUnsorted collationStringSelector:@selector(self)];
-//    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES];
-//    
-//    NSArray *sortDescriptors = @[sortDescriptor];
-//    
-//    countries = [countriesUnsorted sortedArrayUsingDescriptors:sortDescriptors];
-//    [countries sortUsingSelector:@selector(localizedCompare:)];
+    //    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"name" ascending:YES];
+    //
+    //    NSArray *sortDescriptors = @[sortDescriptor];
+    //
+    //    countries = [countriesUnsorted sortedArrayUsingDescriptors:sortDescriptors];
+    //    [countries sortUsingSelector:@selector(localizedCompare:)];
     [self.tableView reloadData];
     
     [[NSNotificationCenter defaultCenter]
@@ -101,8 +101,8 @@ static NSString *CellIdentifier = @"CountryCell";
     
     for (NSMutableArray *section in unsortedSections) {
         NSArray *sortedArray = [section sortedArrayUsingDescriptors:sortDescriptors];
-//        [collation sortedArrayFromArray:section collationStringSelector:selector]];
-//    collationStringSelector:selector]];
+        //        [collation sortedArrayFromArray:section collationStringSelector:selector]];
+        //    collationStringSelector:selector]];
         [sections addObject:sortedArray];
     }
     
@@ -117,7 +117,7 @@ static NSString *CellIdentifier = @"CountryCell";
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     if (tableView == self.searchDisplayController.searchResultsTableView)
-	{
+    {
         return 1;
     }
     //we use sectionTitles and not sections
@@ -127,7 +127,7 @@ static NSString *CellIdentifier = @"CountryCell";
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if (tableView == self.searchDisplayController.searchResultsTableView)
-	{
+    {
         return [_filteredList count];
     }
     return [_sections[section] count];
@@ -159,7 +159,7 @@ static NSString *CellIdentifier = @"CountryCell";
     NSDictionary *cd = nil;
     
     if (tableView == self.searchDisplayController.searchResultsTableView)
-	{
+    {
         cd = _filteredList[indexPath.row];
         
         NSMutableAttributedString *attributedTitle = [[NSMutableAttributedString alloc] initWithString:cd[@"name"] attributes:@{NSForegroundColorAttributeName: [UIColor colorWithWhite:0.785 alpha:1.000], NSFontAttributeName:[UIFont preferredFontForTextStyle:UIFontTextStyleBody]}];
@@ -169,14 +169,14 @@ static NSString *CellIdentifier = @"CountryCell";
         
         cell.textLabel.attributedText = attributedTitle;
     }
-	else
-	{
+    else
+    {
         cd = _sections[indexPath.section][indexPath.row];
         
         cell.textLabel.text = cd[@"name"];
         cell.textLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
     }
-
+    
     cell.imageView.image = [UIImage imageNamed:cd[@"code"]];
     NSLog(@"%@", cd[@"code"]);
     return cell;
@@ -187,7 +187,7 @@ static NSString *CellIdentifier = @"CountryCell";
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-
+    
     if (self.completionBlock) {
         NSDictionary *cd = nil;
         
@@ -206,16 +206,17 @@ static NSString *CellIdentifier = @"CountryCell";
 
 - (void)filterContentForSearchText:(NSString*)searchText scope:(NSString*)scope
 {
-	[_filteredList removeAllObjects];
+    [_filteredList removeAllObjects];
     
     for (NSArray *section in _sections) {
         for (NSDictionary *dict in section)
         {
-                NSComparisonResult result = [dict[@"name"] compare:searchText options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) range:NSMakeRange(0, [searchText length])];
-                if (result == NSOrderedSame)
-                {
-                    [_filteredList addObject:dict];
-                }
+            NSString *name = dict[@"name"];
+            NSComparisonResult result = [dict[@"name"] compare:searchText options:(NSCaseInsensitiveSearch|NSDiacriticInsensitiveSearch) range:NSMakeRange(0, MIN(searchText.length, name.length))];
+            if (result == NSOrderedSame)
+            {
+                [_filteredList addObject:dict];
+            }
         }
     }
 }
@@ -240,7 +241,7 @@ static NSString *CellIdentifier = @"CountryCell";
 #pragma mark - searchBar delegate
 
 - (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar{
-
+    
 }
 
 @end
